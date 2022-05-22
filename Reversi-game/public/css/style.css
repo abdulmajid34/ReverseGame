@@ -52,3 +52,13 @@
     border-radius: 10px;
     cursor: pointer;
 }
+
+/* style css player vs com */
+.boardBackground {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: black;
+    height: 550px;
+    width: 550px;
+}
