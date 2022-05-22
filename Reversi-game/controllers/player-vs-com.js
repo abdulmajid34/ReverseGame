@@ -5,6 +5,7 @@ let gap = 3;
 let boardGames;
 let initCoin;
 let turn = 1;
+let scoreLabel;
 
 
 // init boards
@@ -22,10 +23,36 @@ let boards = [
 window.onload = function() {
     boardGames = document.getElementById("boardGames");
     initCoin = document.getElementById("initCoin");
+    scoreLabel = document.getElementById("score");
     boardGames.style.width = cellWidth * 8 + (gap * 9);
     boardGames.style.height = cellWidth * 8 + (gap * 9);
     drawBoardGame()
     displayCoin()
+}
+
+// count score
+function score() {
+    let scoreWhite = 0;
+    let scoreBlack = 0;
+
+    for(let row = 0; row < BOARD_LENGTH; row++) {
+        for(let column = 0; column < BOARD_LENGTH; column++) {
+            let value = boards[row][column]
+
+            if(value == 1) {
+                scoreBlack += 1;
+            } else if(value == 2) {
+                scoreWhite += 1
+            } else if(value != 0) {
+                console.log("winner")
+            }
+        }
+    }
+    let countScore = scoreBlack + scoreWhite;
+    if(countScore == BOARD_LENGTH * BOARD_LENGTH) {
+        console.log("winner")
+    }
+    scoreLabel.innerHTML = "Black: "+ scoreBlack + " White: "+ scoreWhite;
 }
 
 // draw board game
@@ -100,6 +127,7 @@ function clickedTurn(row, column) {
     }
     // boards[row][column] = 1
     displayCoin()
+    score();
 }
 
 // handle player can clicked turn 
