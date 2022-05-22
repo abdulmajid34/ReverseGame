@@ -15,6 +15,7 @@ let boardBackground;
 let gap = 3;
 let BOARD_LENGTH = 8;
 let cellWidth = 65;
+let coinLayer;
 
 // init boards
 let boards = [
@@ -33,7 +34,9 @@ window.onload = function () {
     boardBackground = document.getElementById('boardBackground');
     // boardBackground.style.width = cellWidth * 8 + (gap * 9);
     // boardBackground.style.height = cellWidth * 8 + (gap * 9)
+    coinLayer = document.getElementById('coinLayer')
     drawBoardSquares()
+    displayCoin()
 }
 
 // Draw Board
@@ -50,6 +53,37 @@ function drawBoardSquares() {
             boardSquares.style.left = (cellWidth + gap) * column + gap+'px'; // position column
             boardSquares.style.top = (cellWidth + gap) * row + gap+'px'; // position row
             boardBackground.appendChild(boardSquares);
+        }
+    }
+}
+
+// make coin display
+function displayCoin() {
+    coinLayer.innerHTML = "";
+    for(let row = 0; row < BOARD_LENGTH; row++) {
+        for(let column = 0; column < BOARD_LENGTH; column++) {
+            let checkValueBoard = boards[row][column]
+            // check value from board length
+            if(checkValueBoard == 0) {
+                // return;
+            } else {
+                // make a display coin with new element div
+                let makeCoin = document.createElement("div");
+                makeCoin.style.position = "absolute";
+                makeCoin.style.width = cellWidth +'px';
+                makeCoin.style.height = cellWidth +'px';
+                makeCoin.style.borderRadius = "50%"
+                makeCoin.style.marginTop = "8px"
+                // make a board squares by one squares
+                makeCoin.style.left = (cellWidth + gap) * column + gap+'px'; // column
+                makeCoin.style.top = (cellWidth + gap) * row + gap +'px'; // row
+                if(checkValueBoard == 1) {
+                    makeCoin.style.backgroundColor = "black"
+                } else {
+                    makeCoin.style.backgroundColor = "white"
+                }
+                coinLayer.appendChild(makeCoin)
+            }
         }
     }
 }
