@@ -22,9 +22,10 @@ let gameOver = false;
 let canMoveLayer;
 let checkWinner;
 let passTurn;
+let btnSkip;
 // let BLACK = 0;
 // let WHITE = 0;
-let count = [];
+let count = 0;
 
 // init boards
 let boards = [
@@ -38,8 +39,16 @@ let boards = [
     [0,0,0,0,0,0,0,0],
 ]
 
+// let boards = [
+//     [0,0,0,0],
+//     [0,2,1,0],
+//     [0,1,2,0],
+//     [0,0,0,0],
+// ]
+
 // event handler 
 window.onload = function() {
+    btnSkip = document.getElementById("skip");
     checkWinner = document.getElementById('winner');
     passTurn = document.getElementById('pass');
     scoreLabel = document.getElementById("score");
@@ -76,15 +85,39 @@ function drawBoardSquares() {
     }
 }
 
-function getWinner() {
+function showPassTurn(turn, row, column) {
+    // let textSkipTurn = document.createElement("a");
+    // textSkipTurn.appendChild(document.createTextNode("Skip"))
+    btnSkip.onclick = function() {
+        buttonSkipTurn(turn, row, column)
+        btnSkip.remove()
+        passTurn.remove()
+    }
+    // btnSkip.appendChild(textSkipTurn)
+}
 
+function buttonSkipTurn(turn, row, column) {
+    // btnSkip.innerHTML = "You CLICKED ME"
+    // console.log(turn, 'btnSkip')
+    if(turn == 1) {
+        turn = 2
+        // console.log(turn, 'cek turn if')
+        canClickSpot(turn, row, column)
+        drawCanMoveCoin()
+    } else if(turn == 2) {
+        turn = 1;
+        // console.log(turn, 'cek turn else if')
+        canClickSpot(turn, row, column)
+        drawCanMoveCoin()
+    } 
 }
 
 function showWinner(BLACK, WHITE) {
-
     let textWinner = 'End of Game! The Winner is ';
     if(BLACK > WHITE) {
         checkWinner.innerHTML = textWinner + "Black"
+    } else if(BLACK == WHITE) {
+        checkWinner.innerHTML = 'End of Game! DRAW'
     } else {
         checkWinner.innerHTML = textWinner + "White"
     }
@@ -134,28 +167,37 @@ function clickedSquare(row, column) { // 3 - 3
 
 
     // cek apakah terdapat spot blank atau 0
-    console.log(turn, row, column, '???')
+    // console.log(turn, row, column, '???')
     if(canClickSpot(turn, row, column) == true) { // 1 3 3
-        console.log(turn, row, column, ">>>>>>")
+        // console.log(turn, row, column, ">>>>>>")
         let affectedBoard = getAffectedBoard(turn, row, column);
-        console.log(affectedBoard, 'affectedboard ===');
+        // console.log(affectedBoard, 'affectedboard ===');
         flipDisc(affectedBoard);
-        console.log(boards[row][column], 'boards')
+        // console.log(boards[row][column], 'boards')
         boards[row][column] = turn
-        console.log(boards[row][column], 'turnnnnn')
+        // console.log(boards[row][column], 'turnnnnn')
         if(turn == 1 && canMove(2)) {
             turn = 2
+            // console.log('ganti turn if')
         } else if(turn == 2 && canMove(1)) {
             turn = 1
-        } else if(turn == 1 && canMove(2) == false) {
-            passTurn.innerHTML = "PASS!, BLACK can't turn"
-            turn = 1
-        } else if(turn == 2 && canMove(1) == false) {
-            passTurn.innerHTML = "PASS!, WHITE can't turn"
-            turn = 2
+            // console.log('ganti turn else')
         }
-        // if(canMove(1) == false && canMove(2) == false) {
-        //     // showWinner()
+        // else if(turn == 1 && canMove(2) == false) {
+        //     passTurn.innerHTML = "PASS!, BLACK can't turn"
+        //     turn = 1
+        // } else if(turn == 2 && canMove(1) == false) {
+        //     passTurn.innerHTML = "PASS!, WHITE can't turn"
+        //     turn = 2
+        // }
+        // else if(turn == 1 && canMove(2) == false) {
+        //     passTurn.innerHTML = "PASS!, BLACK can't turn"
+        //     turn = 1
+        // } else if(turn == 2 && canMove(1) == false) {
+        //     passTurn.innerHTML = "PASS!, WHITE can't turn"
+        //     turn = 2
+        // }
+        // if(canMove(1) == false || canMove(2) == false) {
         //     alert('game over')
         //     gameOver = true
         // }
@@ -171,8 +213,31 @@ function clickedSquare(row, column) { // 3 - 3
         displayCoin();
         drawCanMoveCoin();
         showScore();
-        
     } 
+    else {
+        // console.log('ELSE');
+        if(turn == 1 && canMove(2)) {
+            passTurn.innerHTML = "PASS!, BLACK can't turn"
+            // turn = 1
+            btnSkip.innerHTML = "SKIP"
+            // let textSkipTurn = document.createElement("a");
+            // textSkipTurn.innerHTML = "SKIP"
+            // btnSkip.appendChild(textSkipTurn)
+            showPassTurn(turn, row, column)
+            // drawCanMoveCoin()
+            // getAffectedBoard(turn, row, column)
+        } else if(turn == 2 && canMove(1)) {
+            passTurn.innerHTML = "PASS!, WHITE can't turn"
+            // turn = 2
+            btnSkip.innerHTML = "SKIP"
+            // let textSkipTurn = document.createElement("a");
+            // textSkipTurn.innerHTML = "SKIP"
+            // btnSkip.appendChild(textSkipTurn)
+            showPassTurn(turn, row, column)
+            // drawCanMoveCoin()
+            // getAffectedBoard(turn, row, column)
+        }
+    }
 }
 
 // handle even allowed to click spot
@@ -183,13 +248,28 @@ function canClickSpot(turnId, row, column) { // 1 3 3
         return false
         otherwise return true
     */
+//    console.log("canClickSpot")
     let affectedBoard = getAffectedBoard(turnId, row, column); // 1 3 3
-    console.log(affectedBoard, 'affectedBoard')
+    // console.log(affectedBoard, 'affectedBoard')
     if(affectedBoard.length == 0) {
-        // console.log('masuk');
+        // console.log('canClickSpot false');
+        // if(turnId == 2 && !canMove(2) || turnId == 1 && !canMove(1)) {
+        //     return false
+        // } else if(turnId == 2 && canMove(1) || turnId == 1 && canMove(2)) {
+        //     if(turnId == 1) {
+        //         turnId == 2
+        //         affectedBoard(turnId, row, column)
+        //     } else {
+        //         turnId == 1
+        //         affectedBoard(turnId, row, column)
+        //     }
+        // } else {
+        //     return false
+        // }
         return false
     } else {
-        // console.log('kesini');
+        turn =  turnId
+        // console.log('canClickSpot true');
         return true
     }
 }
@@ -197,13 +277,19 @@ function canClickSpot(turnId, row, column) { // 1 3 3
 
 
 function canMove(turnId) {
-    console.log(turnId)
+    // console.log("canmove")
+    // console.log(turnId)
     for(let row = 0; row < BOARD_LENGTH; row++) {
         for(let column = 0; column < BOARD_LENGTH; column++) {
             // console.log(canClickSpot(turnId, row, column), 'test')
-            if(canClickSpot(turnId, row, column)) {
+            // console.log(turnId, row, column, 'canMove')
+            if(canClickSpot(turnId, row, column) == true) {
                 return true;
-            }
+            } 
+            // else if(canClickSpot(turnId, row, column) == false && turnId == 1) {
+            //     turnId = 2
+            //     canClickSpot(turnId, row, column)
+            // }
         }
     }
     return false;
@@ -235,7 +321,7 @@ function flipDisc(affectedCoin) {
 // handle change for coin and board
 function getAffectedBoard(turnId, row, column) { // 1 3 2
     // console.log(turnId, row, column, 'getAffectedBoard')
-    console.log(turnId, 'turn')
+    // console.log(turnId, 'turn')
     let showAffectedCoin = [];
     /* 
         from current spot:
@@ -251,7 +337,7 @@ function getAffectedBoard(turnId, row, column) { // 1 3 2
     let couldBeAffected = [];
     let colIterator = column; // 3
     // console.log(colIterator, 'col');
-    while(colIterator < 7) {
+    while(colIterator < BOARD_LENGTH-1) {
         colIterator += 1; // 3
         // console.log(colIterator, 'col after');
         let valueAtSpot = boards[row][colIterator]; // 1
@@ -309,7 +395,7 @@ function getAffectedBoard(turnId, row, column) { // 1 3 2
     // down
     let couldBeAffectedBelow = [];
     let rowIteratorBelow = row;
-    while(rowIteratorBelow < 7) {
+    while(rowIteratorBelow < BOARD_LENGTH-1) {
         rowIteratorBelow += 1;
         let valueAtSpot = boards[rowIteratorBelow][column];
         if(valueAtSpot == 0 || valueAtSpot == turnId) {
@@ -328,7 +414,7 @@ function getAffectedBoard(turnId, row, column) { // 1 3 2
     let rowIteratorDownRight = row;
     let colIteratorDownRight = column;
     // karna dia akan berjalan secara diagonal maka buat kondisi untuk mengecek row dan column nya
-    while(rowIteratorDownRight < 7 && colIteratorDownRight < 7) {
+    while(rowIteratorDownRight < BOARD_LENGTH-1 && colIteratorDownRight < BOARD_LENGTH-1) {
         rowIteratorDownRight += 1;
         colIteratorDownRight += 1;
         let valueAtSpot = boards[rowIteratorDownRight][colIteratorDownRight];
@@ -347,7 +433,7 @@ function getAffectedBoard(turnId, row, column) { // 1 3 2
     let couldBeAffectedDownLeft = [];
     let rowIteratorDownLeft = row;
     let colIteratorDownLeft = column;
-    while(rowIteratorDownLeft < 7 && colIteratorDownLeft > 0) {
+    while(rowIteratorDownLeft < BOARD_LENGTH-1 && colIteratorDownLeft > 0) {
         rowIteratorDownLeft += 1;
         colIteratorDownLeft -= 1;
         let valueAtSpot = boards[rowIteratorDownLeft][colIteratorDownLeft];
@@ -385,7 +471,7 @@ function getAffectedBoard(turnId, row, column) { // 1 3 2
     let couldBeAffectedUpRight = [];
     let rowIteratorUpRight = row;
     let colIteratorUpRight = column;
-    while(rowIteratorUpRight > 0 && colIteratorUpRight < 7) {
+    while(rowIteratorUpRight > 0 && colIteratorUpRight < BOARD_LENGTH-1) {
         rowIteratorUpRight -= 1;
         colIteratorUpRight += 1;
         let valueAtSpot = boards[rowIteratorUpRight][colIteratorUpRight];
@@ -399,6 +485,7 @@ function getAffectedBoard(turnId, row, column) { // 1 3 2
             couldBeAffectedUpRight.push(discLocation);
         }
     }
+    // console.log(showAffectedCoin, 'showAffected')
     return showAffectedCoin
 }
 
@@ -446,8 +533,13 @@ function drawCanMoveCoin() {
         for(let column = 0; column < BOARD_LENGTH; column++) {
             let checkValue = boards[row][column];  
             // ngecek apakah terdapat value selain 1 dan 2
-            console.log(canClickSpot(turn, row, column), 'test test')
+            // console.log(canClickSpot(turn, row, column), 'test test')
+            // console.log(turn, row, column, 'drawCanMoveCoin')
+            // console.log(checkValue, 'cek value')
+            // console.log(turn, 'cek turn')
+            // console.log(buttonSkipTurn(turn, row, column), 'test')
             if(checkValue == 0 && canClickSpot(turn, row, column)) {
+                // console.log("MASUK IF")
                 // buat tampilan coin dengan menambahkan element div baru
                 let discOutline = document.createElement("div");
                 discOutline.style.position = "absolute";
@@ -467,6 +559,119 @@ function drawCanMoveCoin() {
                     discOutline.style.border = "2px solid white"
                 }
                 canMoveLayer.appendChild(discOutline)
+            } 
+            else {
+                // console.log("MASUK ELSE")
+                // if(turn == 1 && !canMove(2)) {
+                //     passTurn.innerHTML = "PASS!, BLACK can't turn";
+                //     btnSkip.innerHTML = "SKIP";
+                //     showPassTurn(turn, row, column)
+                // } else if(turn == 2 && !canMove(1)) {
+                //     passTurn.innerHTML = "PASS!, WHITE can't turn";
+                //     btnSkip.innerHTML = "SKIP";
+                //     showPassTurn(turn, row, column);
+                // }
+                // showPassTurn(turn, row, column)
+                // if(turn == 1 && canMove(2)) {
+                //     passTurn.innerHTML = "PASS!, BLACK can't turn"
+                //     turn = 1
+                //     let textSkipTurn = document.createElement("a");
+                //     textSkipTurn.appendChild(document.createTextNode("Skip"))
+                //     btnSkip.appendChild(textSkipTurn)
+                //     showPassTurn(turn, row, column)
+                //     // drawCanMoveCoin()
+                //     // getAffectedBoard(turn, row, column)
+                // } else if(turn == 2 && canMove(1)) {
+                //     passTurn.innerHTML = "PASS!, WHITE can't turn"
+                //     turn = 2
+                //     let textSkipTurn = document.createElement("a");
+                //     textSkipTurn.appendChild(document.createTextNode("Skip"))
+                //     btnSkip.appendChild(textSkipTurn)
+                //     showPassTurn(turn, row, column)
+                //     // drawCanMoveCoin()
+                //     // getAffectedBoard(turn, row, column)
+                // }
+                // if(turn == 1) {
+                //     passTurn.innerHTML = "PASS!, BLACK can't turn"
+                // } else {
+                //     passTurn.innerHTML = "PASS!, WHITE can't turn"
+                // }
+                // if(turn == 1 && canMove(2)) {
+                //     turn = 2
+                //     if(checkValue == 0 && canClickSpot(turn, row, column)) {
+                //         let discOutline = document.createElement("div");
+                //             discOutline.style.position = "absolute";
+                //             discOutline.style.width = cellWidth - 8 +'px';
+                //             discOutline.style.height = cellWidth - 8 +'px';
+                //             discOutline.style.borderRadius = "50%"
+                //             discOutline.style.cursor = "pointer"
+                //             // make a board squares by one squares
+                //             discOutline.style.left = (cellWidth + gap) * column + gap + 2+'px'; // column
+                //             discOutline.style.top = (cellWidth + gap) * row + gap + 9 +'px'; // row
+                //             discOutline.setAttribute("onclick", "clickedSquare("+row+", "+column+")");
+                //             discOutline.style.zIndex = 2;
+                //             if(turn == 1) {
+                //                 discOutline.style.border = "2px solid black"
+                //             }
+                //             if(turn == 2) {
+                //                 discOutline.style.border = "2px solid white"
+                //             }
+                //             canMoveLayer.appendChild(discOutline)
+                //     }
+                // } else if(turn == 2 && canMove(1)) {
+                //     turn = 1
+                //     if(checkValue == 0 && canClickSpot(turn, row, column)) {
+                //         let discOutline = document.createElement("div");
+                //             discOutline.style.position = "absolute";
+                //             discOutline.style.width = cellWidth - 8 +'px';
+                //             discOutline.style.height = cellWidth - 8 +'px';
+                //             discOutline.style.borderRadius = "50%"
+                //             discOutline.style.cursor = "pointer"
+                //             // make a board squares by one squares
+                //             discOutline.style.left = (cellWidth + gap) * column + gap + 2+'px'; // column
+                //             discOutline.style.top = (cellWidth + gap) * row + gap + 9 +'px'; // row
+                //             discOutline.setAttribute("onclick", "clickedSquare("+row+", "+column+")");
+                //             discOutline.style.zIndex = 2;
+                //             if(turn == 1) {
+                //                 discOutline.style.border = "2px solid black"
+                //             }
+                //             if(turn == 2) {
+                //                 discOutline.style.border = "2px solid white"
+                //             }
+                //             canMoveLayer.appendChild(discOutline)
+                //     }
+                // }
+                // console.log(canMove(1), 'satu')
+                // console.log(canMove(2), 'dua')
+                // if(turn == 1 && canMove(2) == false) {
+                //     console.log('sini')
+                //     passTurn.innerHTML = "PASS!, WHITE can't turn"
+                //     turn = 1
+                //     getAffectedBoard(turn, row, column)
+                // } else if(turn == 2 && canMove(1) == false) {
+                //     console.log('situ')
+                //     passTurn.innerHTML = "PASS!, BLACK can't turn"
+                //     turn = 2
+                //     getAffectedBoard(turn, row, column)
+                // }
+                // if(checkValue == 0 && !canClickSpot(turn, row, column) && canMove(2)) {
+                //     turn = 2
+                //     canClickSpot(turn, row, column)
+                // } else if(checkValue == 0 && !canClickSpot(turn, row, column) && canMove(1)) {
+                //     turn = 1
+                //     canClickSpot(turn, row, column)
+                // }
+                // alert("PASS Turn")
+                // console.log(turn, row, column, 'MASUK ELSE >>>')
+                // if(turn == 1 && canMove(2) == false) {
+                //     turn = 1
+                //     console.log(turn, row, column, 'MASUK ELSE ====')
+                //     canClickSpot(turn, row, column)
+                // } else if(turn == 2 && canMove(1) == false) {
+                //     turn = 2
+                //     console.log(turn, row, column, 'MASUK ELSE ?????')
+                //     canClickSpot(turn, row, column)
+                // }
             }
         }
     }
