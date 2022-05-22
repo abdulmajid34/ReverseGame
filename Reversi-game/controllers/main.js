@@ -10,18 +10,20 @@
             found at every cell of the game board)
 */
 
-let blackBackground;
+// set variabel
+let boardBackground;
 let gap = 3;
 let BOARD_LENGTH = 8;
 let cellWidth = 65;
-let discLayer;
+let coinLayer;
 let turn = 1;
 let scoreLabel;
 let gameOver = false
 let canMoveLayer;
 let checkWinner;
 
-let disc = [
+// init boards
+let boards = [
     [0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0],
@@ -32,29 +34,27 @@ let disc = [
     [0,0,0,0,0,0,0,0],
 ]
 
+// event handler 
 window.onload = function() {
     checkWinner = document.getElementById('winner')
     scoreLabel = document.getElementById("score");
     canMoveLayer = document.getElementById("canMoveLayer");
-    blackBackground = document.getElementById("blackBackground");
-    discLayer = document.getElementById("discLayer");
-    blackBackground.style.width = cellWidth * 8 + (gap * 9);
-    blackBackground.style.height = cellWidth * 8 + (gap * 9);
-    drawGreenSquares()
-    drawDisc();
-    drawCanMoveLayer();
+    boardBackground = document.getElementById("boardBackground");
+    coinLayer = document.getElementById("coinLayer");
+    boardBackground.style.width = cellWidth * 8 + (gap * 9);
+    boardBackground.style.height = cellWidth * 8 + (gap * 9);
+    drawBoardSquares()
+    displayCoin();
+    drawCanMoveCoin();
 }
 
-function drawGreenSquares() {
+// Draw Board
+function drawBoardSquares() {
     for(let row = 0; row < BOARD_LENGTH; row++) {
         for(let column = 0; column < BOARD_LENGTH; column++) {
+            // console.log(row, column, 'r c');
+            // make a new element div for squares board
             let greenSquare = document.createElement("div");
-            // let width = greenSquare.offsetWidth;
-            // let newWidth = width + 65;
-            // let height = greenSquare.offsetHeight;
-            // let newHeight = height + 65;
-            // greenSquare.style.width = newWidth + 'px';
-            // greenSquare.style.height = newHeight + 'px';
             greenSquare.style.position = "absolute";
             greenSquare.style.width = cellWidth+'px';
             greenSquare.style.height = cellWidth+'px';
@@ -65,7 +65,7 @@ function drawGreenSquares() {
             greenSquare.style.top = (cellWidth + gap) * row + gap+'px'; // row
             // add event onclicm define with setAttribute and make function with parameter row and column
             greenSquare.setAttribute("onclick", "clickedSquare("+row+", "+column+")");
-            blackBackground.appendChild(greenSquare)
+            boardBackground.appendChild(greenSquare)
         }
     }
 }
@@ -86,7 +86,7 @@ function showScore() {
 
     for(let row = 0; row < BOARD_LENGTH; row++) {
         for(let column = 0; column < BOARD_LENGTH; column++) {
-            let value = disc[row][column]
+            let value = boards[row][column]
             if(value == 1) {
                 scoreBlack += 1
             } else if(value == 2) {
@@ -94,54 +94,55 @@ function showScore() {
             }
         }
     }
-    showWinner(scoreBlack, scoreWhite)
     scoreLabel.innerHTML = "Black: "+ scoreBlack + " White: "+ scoreWhite;
+    // showWinner(scoreBlack, scoreWhite)
 }
 
-// event click square
+// handle event click in square
 function clickedSquare(row, column) {
     if(gameOver) {
-        return;
+        // showWinner()
+        return
     }
     /* 
-        jika pengguna diizinkan untuk mengklik di sini 
-        dapatkan semua disk yang terpengaruh
-        balikkan
+        if the user is allowed to click here
+        get all affected coin
+        flip them
     */
 
     // add conditional if blank spot
-    if(disc[row][column] != 0) {
+    if(boards[row][column] != 0) {
         return;
     }
 
     // cek apakah terdapat spot blank atau 0
     if(canClickSpot(turn, row, column) == true) {
-        // getAffectedDisc adalah fungsi untuk mendapatkan perubahan dari disc setelah di click
-        let affectedDisc = getAffectedDisc(turn, row, column);
-        // flipDisc adalah fungsi untuk merubah disc setelah fungsi getAffectedDisc mendapatkan perubahan
-        flipDisc(affectedDisc);
-        disc[row][column] = turn
+        let affectedBoard = getAffectedBoard(turn, row, column);
+        flipDisc(affectedBoard);
+        boards[row][column] = turn
         if(turn == 1 && canMove(1)) {
             turn = 2
         } else if(turn == 2 && canMove(2)) {
             turn = 1
         }
         if(canMove(1) == false && canMove(2) == false) {
-            showWinner()
+            // showWinner()
+            alert('game over')
             gameOver = true
         }
-        drawDisc();
-        drawCanMoveLayer();
+        displayCoin();
+        drawCanMoveCoin();
         showScore();
     }
 }
 
-function drawCanMoveLayer() {
+// make suggestion turn coin
+function drawCanMoveCoin() {
     canMoveLayer.innerHTML = ""
     for(let row = 0; row < BOARD_LENGTH; row++) {
         for(let column = 0; column < BOARD_LENGTH; column++) {
-            let checkValue = disc[row][column];
-            console.log(checkValue, 'drawCanMoveLayer')
+            let checkValue = boards[row][column];
+            // console.log(checkValue, 'drawCanMoveCoin')   
             // ngecek apakah terdapat value selain 1 dan 2
             if(checkValue == 0 && canClickSpot(turn, row, column)) {
                 // buat tampilan coin dengan menambahkan element div baru
@@ -178,25 +179,26 @@ function canMove(id) {
     return false;
 }
 
-// untuk mengklik kotak yang kosong dan di cek
+// handle even allowed to click spot
 function canClickSpot(id, row, column) {
-    console.log(id, row, column, 'id-row-col')
+    // console.log(id, row, column, 'id-row-col')
     /* 
         if the number of affected disc by clicking at this spot would be 0
         return false
         otherwise return true
     */
-    let affectedDisc = getAffectedDisc(id, row, column);
-    console.log(affectedDisc, 'canClickSpot')
-    if(affectedDisc.length == 0) {
+    let affectedBoard = getAffectedBoard(id, row, column);
+    // console.log(affectedDisc, 'canClickSpot')
+    if(affectedBoard.length == 0) {
         return false
     } else {
         return true
     }
 }
 
-function flipDisc(affectedDisc) {
-    console.log(affectedDisc, 'flipDisc')
+// function to change coin after getAffectedBoard
+function flipDisc(affectedCoin) {
+    // console.log(affectedDisc, 'flipDisc')
     /* 
         for all item in the list: affectedDisc:
         if the disc at that has spot as value 1
@@ -204,18 +206,19 @@ function flipDisc(affectedDisc) {
         else 
             make it a 1
     */
-    for(let i = 0; i < affectedDisc.length; i++) {
-        let spot = affectedDisc[i]
-        if(disc[spot.row][spot.column] == 1) {
-            disc[spot.row][spot.column] = 2;
+    for(let i = 0; i < affectedCoin.length; i++) {
+        let spot = affectedCoin[i]
+        if(boards[spot.row][spot.column] == 1) {
+            boards[spot.row][spot.column] = 2;
         } else {
-            disc[spot.row][spot.column] = 1
+            boards[spot.row][spot.column] = 1
         }
     }
 }   
 
-function getAffectedDisc(id, row, column) {
-    let showAffectedDisc = [];
+// handle change for coin and board
+function getAffectedBoard(id, row, column) {
+    let showAffectedCoin = [];
     /* 
         from current spot:
         for all eight directions. (left right up down and 4 diagonals)
@@ -229,13 +232,14 @@ function getAffectedDisc(id, row, column) {
     // to the right
     let couldBeAffected = [];
     let colIterator = column;
+    // console.log(colIterator, 'col');
     while(colIterator < 7) {
         colIterator += 1;
-        let valueAtSpot = disc[row][colIterator];
-        console.log(valueAtSpot, 'getAffectedDisc');
+        let valueAtSpot = boards[row][colIterator];
+        // console.log(valueAtSpot, 'getAffectedBoard');
         if(valueAtSpot == 0 || valueAtSpot == id) {
             if(valueAtSpot == id) {
-                showAffectedDisc = showAffectedDisc.concat(couldBeAffected);
+                showAffectedCoin = showAffectedCoin.concat(couldBeAffected);
             }
             break;
         } else {
@@ -243,16 +247,16 @@ function getAffectedDisc(id, row, column) {
             couldBeAffected.push(discLocation);
         }
     }
-
+    
     // to the left
     let couldBeAffectedLeft = [];
     let colIteratorLeft = column;
     while(colIteratorLeft > 0) {
         colIteratorLeft -= 1;
-        let valueAtSpot = disc[row][colIteratorLeft];
+        let valueAtSpot = boards[row][colIteratorLeft];
         if(valueAtSpot == 0 || valueAtSpot == id) {
             if(valueAtSpot == id) {
-                showAffectedDisc = showAffectedDisc.concat(couldBeAffectedLeft);
+                showAffectedCoin = showAffectedCoin.concat(couldBeAffectedLeft);
             }
             break;
         } else {
@@ -266,10 +270,10 @@ function getAffectedDisc(id, row, column) {
     let rowIteratorAbove = row;
     while(rowIteratorAbove > 0) {
         rowIteratorAbove -= 1;
-        let valueAtSpot = disc[rowIteratorAbove][column];
+        let valueAtSpot = boards[rowIteratorAbove][column];
         if(valueAtSpot == 0 || valueAtSpot == id) {
             if(valueAtSpot == id) {
-                showAffectedDisc = showAffectedDisc.concat(couldBeAffectedAbove);
+                showAffectedCoin = showAffectedCoin.concat(couldBeAffectedAbove);
             }
             break;
         } else {
@@ -283,10 +287,10 @@ function getAffectedDisc(id, row, column) {
     let rowIteratorBelow = row;
     while(rowIteratorBelow < 7) {
         rowIteratorBelow += 1;
-        let valueAtSpot = disc[rowIteratorBelow][column];
+        let valueAtSpot = boards[rowIteratorBelow][column];
         if(valueAtSpot == 0 || valueAtSpot == id) {
             if(valueAtSpot == id) {
-                showAffectedDisc = showAffectedDisc.concat(couldBeAffectedBelow);
+                showAffectedCoin = showAffectedCoin.concat(couldBeAffectedBelow);
             }
             break;
         } else {
@@ -303,10 +307,10 @@ function getAffectedDisc(id, row, column) {
     while(rowIteratorDownRight < 7 && colIteratorDownRight < 7) {
         rowIteratorDownRight += 1;
         colIteratorDownRight += 1;
-        let valueAtSpot = disc[rowIteratorDownRight][colIteratorDownRight];
+        let valueAtSpot = boards[rowIteratorDownRight][colIteratorDownRight];
         if(valueAtSpot == 0 || valueAtSpot == id) {
             if(valueAtSpot == id) {
-                showAffectedDisc = showAffectedDisc.concat(couldBeAffectedDownRight);
+                showAffectedCoin = showAffectedCoin.concat(couldBeAffectedDownRight);
             }
             break;
         } else {
@@ -322,10 +326,10 @@ function getAffectedDisc(id, row, column) {
     while(rowIteratorDownLeft < 7 && colIteratorDownLeft > 0) {
         rowIteratorDownLeft += 1;
         colIteratorDownLeft -= 1;
-        let valueAtSpot = disc[rowIteratorDownLeft][colIteratorDownLeft];
+        let valueAtSpot = boards[rowIteratorDownLeft][colIteratorDownLeft];
         if(valueAtSpot == 0 || valueAtSpot == id) {
             if(valueAtSpot == id) {
-                showAffectedDisc = showAffectedDisc.concat(couldBeAffectedDownLeft);
+                showAffectedCoin = showAffectedCoin.concat(couldBeAffectedDownLeft);
             }
             break;
         } else {
@@ -341,10 +345,10 @@ function getAffectedDisc(id, row, column) {
     while(rowIteratorUpLeft > 0 && colIteratorUpLeft > 0) {
         rowIteratorUpLeft -= 1;
         colIteratorUpLeft -= 1;
-        let valueAtSpot = disc[rowIteratorUpLeft][colIteratorUpLeft];
+        let valueAtSpot = boards[rowIteratorUpLeft][colIteratorUpLeft];
         if(valueAtSpot == 0 || valueAtSpot == id) {
             if(valueAtSpot == id) {
-                showAffectedDisc = showAffectedDisc.concat(couldBeAffectedUpLeft);
+                showAffectedCoin = showAffectedCoin.concat(couldBeAffectedUpLeft);
             }
             break;
         } else {
@@ -360,10 +364,10 @@ function getAffectedDisc(id, row, column) {
     while(rowIteratorUpRight > 0 && colIteratorUpRight < 7) {
         rowIteratorUpRight -= 1;
         colIteratorUpRight += 1;
-        let valueAtSpot = disc[rowIteratorUpRight][colIteratorUpRight];
+        let valueAtSpot = boards[rowIteratorUpRight][colIteratorUpRight];
         if(valueAtSpot == 0 || valueAtSpot == id) {
             if(valueAtSpot == id) {
-                showAffectedDisc = showAffectedDisc.concat(couldBeAffectedUpRight);
+                showAffectedCoin = showAffectedCoin.concat(couldBeAffectedUpRight);
             }
             break;
         } else {
@@ -372,19 +376,20 @@ function getAffectedDisc(id, row, column) {
         }
     }
 
-    return showAffectedDisc
+    return showAffectedCoin
 }
 
-function drawDisc() {
-    discLayer.innerHTML = ""
+// make coin display
+function displayCoin() {
+    coinLayer.innerHTML = ""
     for(let row = 0; row < BOARD_LENGTH; row++) {
         for(let column = 0; column < BOARD_LENGTH; column++) {
-            let checkValue = disc[row][column];
-            // ngecek apakah terdapat value selain 1 dan 2
+            let checkValue = boards[row][column];
+            // check value from board length
             if(checkValue == 0) {
-
+                // return;
             } else {
-                // buat tampilan coin dengan menambahkan element div baru
+                // make a display coin with new element div
                 let makeCoin = document.createElement("div");
                 makeCoin.style.position = "absolute";
                 makeCoin.style.width = cellWidth +'px';
@@ -401,7 +406,7 @@ function drawDisc() {
                 } else {
                     makeCoin.style.backgroundColor = "white"
                 }
-                discLayer.appendChild(makeCoin)
+                coinLayer.appendChild(makeCoin)
             }
         }
     }
