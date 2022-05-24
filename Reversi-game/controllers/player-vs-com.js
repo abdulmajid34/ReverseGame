@@ -8,6 +8,7 @@ let turn = 1;
 let scoreLabel;
 let canMoveCoin;
 let coorSuggest = [];
+let tempCoordPlayer = []
 
 
 // init boards
@@ -116,6 +117,7 @@ function drawCanMoveCoin() {
             let checkValue = boards[row][column];
             if(checkValue == 0 && canClickSpot(turn, row, column)) {
                 let discOutline = document.createElement("div");
+                discOutline.className = "suggest-outline"
                 discOutline.style.position = "absolute";
                 discOutline.style.width = cellWidth - 8 +'px';
                 discOutline.style.height = cellWidth - 8 +'px';
@@ -126,24 +128,39 @@ function drawCanMoveCoin() {
                 discOutline.style.top = (cellWidth + gap) * row + gap + 9 +'px'; // row
                 discOutline.setAttribute("onclick", "clickedTurn("+row+", "+column+")");
                 discOutline.style.zIndex = 2;
+                discOutline.style.border = "2px solid black"
                 if(turn == 1) {
                     discOutline.style.border = "2px solid black"
-                }
-                if(turn == 2) {
-                    // let turnCom = document.createElement("a")
-                    // turnCom.className = "coin-suggest-com";
-                    // $('#canMoveCoin').append(
-                    //     `<a class="coin-suggest-com" href=${this}></a>`
-                    // )
+                    tempPlayerTurn(row, column)
+                } else if(turn == 2) {
+                    discOutline.style.border = "2px solid white"
+                    
                     setTimeout(() => {
-                        discOutline.style.border = "2px solid white"
-                        computerMove(turn, row, column)
-                    }, 500)
+                        tempCoordAIturn(row, column)
+                    }, 3000)
                 }
+                
                 canMoveCoin.appendChild(discOutline)
             }
         }
     }
+}
+
+function tempPlayerTurn(row, column) {
+    let valueAtSpot = boards[row][column]
+    if(canClickSpot(turn, row, column) && valueAtSpot == 0) {
+        let checkAffectedBoard = getAffectedBoard(turn, row, column)
+        console.log(checkAffectedBoard, 'check');
+        if(checkAffectedBoard.length > 0) {
+            let coorLocation = {row:row,column:column}
+        tempCoordPlayer.push(coorLocation)
+        console.log(tempCoordPlayer, 'coordPlayer')
+        }
+        
+    } else {
+        console.log("MASUK ELSE TEMP");
+    }
+    // tempCoordPlayer = []
 }
 
 // handle clicked turn player
@@ -155,72 +172,94 @@ function clickedTurn(row, column) {
         return;
     }
 
+    console.log(row, column, 'CEK PLAYER TURN');
+
     if(canClickSpot(turn, row, column)) { // 
         let affectedBoard = getAffectedBoard(turn, row, column);
+        console.log(affectedBoard, 'affected');
         flipCoin(affectedBoard)
         // console.log(boards[row][column], 'boards')
         boards[row][column] = turn;
-        // console.log(boards[row][column], 'turn')
+        console.log(boards[row][column], 'turn')
         if(turn == 1 && canMove(2)) {
             turn = 2
-        } 
-        // else if(turn == 2 && canMove(1)) {
-        //     // turn = 1
-        //     // setTimeout(() => {
-        //     //     computerMove(turn, row, column)
-        //     // }, 500)
+        }
+        tempCoordPlayer = []
+        displayCoin();
+        score();
+        drawCanMoveCoin();
+    } 
+     
+}
+
+function tempCoordAIturn(row, column) {
+    // let temp;
+    let coorLocation = {row:row,column:column}
+    coorSuggest.push(coorLocation)
+    if(coorSuggest.length == 0) {
+        return
+    } else {
+        // console.log(coorSuggest, 'coor')
+        let random = Math.floor(Math.random() * coorSuggest.length)
+        // console.log(random, 'random')
+        // console.log(coorSuggest[random], 'random coord')
+        if(canClickSpot(turn, coorSuggest[random].row, coorSuggest[random].column)) {
+            // console.log(coorSuggest[random].row, coorSuggest[random].column, 'if canClickSpot')
+            computerMove(coorSuggest[random].row, coorSuggest[random].column)
+        } else {
+            // NOTES: BUG 1
+            // console.log(coorSuggest[random].row, coorSuggest[random].column, 'else canClickSpot')
+        }
+        // if(random != NaN || undefined) {
+        //     let cutCoord = coorSuggest.slice(0, 1)
+        //     console.log(cutCoord, 'cut')
+        //     temp = cutCoord
         // }
+        // let cutCoord = coorSuggest.slice(1, 2);
+        // console.log(cutCoord, 'coor')
+        // let randomTurn = Math.floor(Math.random() * cutCoord.length)
+        // console.log(randomTurn, 'random turn')
     }
-    // if(turn == 2) {
-    //     setTimeout(() => {
-    //         computerMove(turn, row, column)
-    //     }, 500);
-    // }
-    // if(turn == 1) {
-    //     clickedTurn(row, column)
-    // } else if(turn == 2) {
-    //     return;
-    // }
-    // boards[row][column] = 1
-    computerMove(turn, row, column)
-    displayCoin();
-    score();
-    drawCanMoveCoin();
 }
 
 // handle computer turn
-function computerMove(turn, row, column) {
-    console.log(turn, row, column, 'coord')
+function computerMove(row, column) {
+    // console.log(turn, row, column, 'coord')
     // NOTES: COORDINAT SUGGESTED AI
-    let coorLocation = {row:row,column:column}
-    coorSuggest.push(coorLocation)
-    // console.log(coorSuggest, 'test');
+    // let coorLocation = {row:row,column:column}
+    // coorSuggest.push(coorLocation)
+    // let cutCoord = coorSuggest.slice(0, 1)
+    // console.log(cutCoord, 'cut')
     // NOTES: RANDOM berdasarkan COORDINAT AI
-    let randomTurn = Math.floor(Math.random() * coorSuggest.length)
-    // console.log(coorSuggest[randomTurn], 'random');
+    // let randomTurn = Math.floor(Math.random() * coorSuggest.length)
     // console.log(turn, coorSuggest[randomTurn].row, coorSuggest[randomTurn].column, 'coord random')
-    let valueAtSpot = boards[coorSuggest[randomTurn].row][coorSuggest[randomTurn].column]
-    console.log(valueAtSpot, 'valueAtSpot')
-    if(canClickSpot(turn, coorSuggest[randomTurn].row, coorSuggest[randomTurn].column) && valueAtSpot == 0) {
-        console.log(turn, coorSuggest[randomTurn].row, coorSuggest[randomTurn].column, 'coord after if')
-        let affectedBoard = getAffectedBoard(turn, coorSuggest[randomTurn].row, coorSuggest[randomTurn].column);
-        console.log(affectedBoard, 'affectedBoard')
+    // let valueAtSpot = boards[coorSuggest[randomTurn].row][coorSuggest[randomTurn].column]
+    let valueAtSpot = boards[row][column]
+    if(canClickSpot(turn, row, column) && valueAtSpot == 0 && turn == 2) {
+        // console.log(turn, row, column, 'coord after if')
+        let affectedBoard = getAffectedBoard(turn, row, column);
+        // console.log(affectedBoard, 'check');
+        document.querySelector(".suggest-outline").click(affectedBoard)
+        // console.log('kesini kali');
+        // console.log(affectedBoard, 'affectedBoard')
         flipCoin(affectedBoard);
         if(turn == 2 && canMove(1)) {
             turn = 1
+            console.log(turn, 'turnnnnn');
         }
-        
-        // $('.coin-suggest-com').map(function() {
-        //     coorSuggest.push($(this).attr('href'));
-        //     setTimeout(() => {
-        //         window.location.href = coorSuggest[randomTurn].row, coorSuggest[randomTurn].column
-        //     }, 500) 
-        //     
-        // })
+        console.log("masuk kesini yuk");
+        // drawBoardGame()
         // drawCanMoveCoin()
+        coorSuggest = [];
+        // console.log(coorSuggest, 'coorSuggest')
     } else {
-        console.log("ELSE")
+        turn = 1
+        // console.log("ELSE")
+        // drawCanMoveCoin()
+        // return
     }
+    drawCanMoveCoin()
+    
 }
 
 // handle check canMove next turn player
