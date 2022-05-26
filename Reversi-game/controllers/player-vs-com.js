@@ -115,6 +115,7 @@ function drawCanMoveCoin() {
     for(let row = 0; row < BOARD_LENGTH; row++) {
         for(let column = 0; column < BOARD_LENGTH; column++) {
             let checkValue = boards[row][column];
+            console.log(row, column, 'test');
             if(checkValue == 0 && canClickSpot(turn, row, column)) {
                 let discOutline = document.createElement("div");
                 discOutline.className = "suggest-outline"
@@ -131,34 +132,35 @@ function drawCanMoveCoin() {
                 discOutline.style.border = "2px solid black"
                 if(turn == 1) {
                     discOutline.style.border = "2px solid black"
-                    tempPlayerTurn(row, column)
+                    tempPlayerTurn(turn, row, column)
                 } else if(turn == 2) {
+                    discOutline.className = "suggest-outline"
                     discOutline.style.border = "2px solid white"
-                    
                     setTimeout(() => {
-                        tempCoordAIturn(row, column)
+                        tempCoordAIturn(turn, row, column)
                     }, 3000)
                 }
-                
                 canMoveCoin.appendChild(discOutline)
             }
         }
     }
 }
 
-function tempPlayerTurn(row, column) {
+function tempPlayerTurn(turnId, row, column) {
+    // console.log(row, column, 'tempPlyerTurn');
     let valueAtSpot = boards[row][column]
-    if(canClickSpot(turn, row, column) && valueAtSpot == 0) {
-        let checkAffectedBoard = getAffectedBoard(turn, row, column)
-        console.log(checkAffectedBoard, 'check');
-        if(checkAffectedBoard.length > 0) {
+    if(canClickSpot(turnId, row, column) && valueAtSpot == 0) {
+        let checkAffectedBoard = getAffectedBoard(turnId, row, column)
+        // console.log(checkAffectedBoard, 'check');
+        if(checkAffectedBoard.length == 0) {
+            console.log("ELSE CHECK");
+        } else {
             let coorLocation = {row:row,column:column}
-        tempCoordPlayer.push(coorLocation)
-        console.log(tempCoordPlayer, 'coordPlayer')
+            tempCoordPlayer.push(coorLocation)
+        // console.log(tempCoordPlayer, 'coordPlayer')
         }
-        
     } else {
-        console.log("MASUK ELSE TEMP");
+        console.log("ELSE CHECK CANCLICKSPOT");
     }
     // tempCoordPlayer = []
 }
@@ -172,18 +174,23 @@ function clickedTurn(row, column) {
         return;
     }
 
-    console.log(row, column, 'CEK PLAYER TURN');
+    // console.log(row, column, 'CEK PLAYER TURN');
 
     if(canClickSpot(turn, row, column)) { // 
         let affectedBoard = getAffectedBoard(turn, row, column);
-        console.log(affectedBoard, 'affected');
+        // console.log(affectedBoard, 'affected');
         flipCoin(affectedBoard)
         // console.log(boards[row][column], 'boards')
         boards[row][column] = turn;
-        console.log(boards[row][column], 'turn')
+        // console.log(boards[row][column], 'turn')
         if(turn == 1 && canMove(2)) {
             turn = 2
+        } 
+        else if(turn == 2 && canMove(1)) {
+            turn = 1
+            tempCoordAIturn(turn, row, column)
         }
+        console.log(turn, 'turn')
         tempCoordPlayer = []
         displayCoin();
         score();
@@ -192,34 +199,55 @@ function clickedTurn(row, column) {
      
 }
 
-function tempCoordAIturn(row, column) {
-    // let temp;
-    let coorLocation = {row:row,column:column}
-    coorSuggest.push(coorLocation)
-    if(coorSuggest.length == 0) {
-        return
-    } else {
-        // console.log(coorSuggest, 'coor')
+function tempCoordAIturn(turnId, row, column) {
+    // console.log(row, column, 'rc temp')
+    let availSpot = boards[row][column];
+    if(canClickSpot(turnId, row, column) && availSpot == 0) {
+        let affectedBoard = getAffectedBoard(turnId, row, column)
+        console.log(affectedBoard, 'coorSuggest')
+        let coorLocation = {row:row,column:column}
+        coorSuggest.push(coorLocation)
+        console.log(coorSuggest, 'suggest')
         let random = Math.floor(Math.random() * coorSuggest.length)
-        // console.log(random, 'random')
-        // console.log(coorSuggest[random], 'random coord')
+        // console.log(random, 'random');
         if(canClickSpot(turn, coorSuggest[random].row, coorSuggest[random].column)) {
-            // console.log(coorSuggest[random].row, coorSuggest[random].column, 'if canClickSpot')
+            console.log(coorSuggest[random].row, coorSuggest[random].column, 'if canClickSpot')
             computerMove(coorSuggest[random].row, coorSuggest[random].column)
+            turn = 1
+            coorSuggest = [];
+            console.log(coorSuggest, 'coor')
         } else {
             // NOTES: BUG 1
             // console.log(coorSuggest[random].row, coorSuggest[random].column, 'else canClickSpot')
         }
-        // if(random != NaN || undefined) {
-        //     let cutCoord = coorSuggest.slice(0, 1)
-        //     console.log(cutCoord, 'cut')
-        //     temp = cutCoord
+        // if(coorSuggest.length == 0) {
+        //     return
+        // } else {
+        //     // console.log(coorSuggest, 'coor')
+        //     let random = Math.floor(Math.random() * coorSuggest.length)
+        //     // console.log(random, 'random')
+        //     // console.log(coorSuggest[random], 'random coord')
+        //     if(canClickSpot(turn, coorSuggest[random].row, coorSuggest[random].column)) {
+        //         // console.log(coorSuggest[random].row, coorSuggest[random].column, 'if canClickSpot')
+        //         computerMove(coorSuggest[random].row, coorSuggest[random].column)
+        //     } else {
+        //         // NOTES: BUG 1
+        //         // console.log(coorSuggest[random].row, coorSuggest[random].column, 'else canClickSpot')
+        //     }
+        //     // if(random != NaN || undefined) {
+        //     //     let cutCoord = coorSuggest.slice(0, 1)
+        //     //     console.log(cutCoord, 'cut')
+        //     //     temp = cutCoord
+        //     // }
+        //     // let cutCoord = coorSuggest.slice(1, 2);
+        //     // console.log(cutCoord, 'coor')
+        //     // let randomTurn = Math.floor(Math.random() * cutCoord.length)
+        //     // console.log(randomTurn, 'random turn')
         // }
-        // let cutCoord = coorSuggest.slice(1, 2);
-        // console.log(cutCoord, 'coor')
-        // let randomTurn = Math.floor(Math.random() * cutCoord.length)
-        // console.log(randomTurn, 'random turn')
+    } else {
+        console.log("masuk ELSE temp");
     }
+    
 }
 
 // handle computer turn
@@ -236,7 +264,7 @@ function computerMove(row, column) {
     // let valueAtSpot = boards[coorSuggest[randomTurn].row][coorSuggest[randomTurn].column]
     let valueAtSpot = boards[row][column]
     if(canClickSpot(turn, row, column) && valueAtSpot == 0 && turn == 2) {
-        // console.log(turn, row, column, 'coord after if')
+        console.log(turn, row, column, 'coord after if')
         let affectedBoard = getAffectedBoard(turn, row, column);
         // console.log(affectedBoard, 'check');
         document.querySelector(".suggest-outline").click(affectedBoard)
@@ -245,20 +273,22 @@ function computerMove(row, column) {
         flipCoin(affectedBoard);
         if(turn == 2 && canMove(1)) {
             turn = 1
-            console.log(turn, 'turnnnnn');
-        }
-        console.log("masuk kesini yuk");
+        } 
+        // console.log("masuk kesini yuk");
         // drawBoardGame()
-        // drawCanMoveCoin()
-        coorSuggest = [];
+        // setTimeout(() => {
+        //     tempCoordAIturn(turn, row, column)
+        // }, 3000)
+        drawCanMoveCoin()
+        
         // console.log(coorSuggest, 'coorSuggest')
     } else {
-        turn = 1
+        // turn = 1
         // console.log("ELSE")
         // drawCanMoveCoin()
         // return
     }
-    drawCanMoveCoin()
+    // drawCanMoveCoin()
     
 }
 
@@ -293,6 +323,8 @@ function flipCoin(affectedCoin) {
         if(boards[spot.row][spot.column] == 1) {
             boards[spot.row][spot.column] = 2
         } else {
+            // let affectedFlipCoin = document.createElement("div");
+            // affectedFlipCoin.style.borderRadius = "10px solid white"
             boards[spot.row][spot.column] = 1
         }
     }
